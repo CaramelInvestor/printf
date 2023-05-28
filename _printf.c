@@ -14,57 +14,66 @@
 
 int _printf(const char *format, ...)
 {
-    va_list args;
-    va_start(args, format);
-    int count; /*counts the number of characters printed*/
+	va_list args;
 
-    count = 0;
+	va_start(args, format);
 
-    while (*format != '\0') /*as long as the characters are not null byte*/
-    {
-        if (*format == '%') /*note when the program encounters a "%"*/
-        {
-            format++; /*Move past '%'*/
+	int count; /*counts the number of characters printed*/
 
-            if (*format == 'c')
-            {
-                /*print a character*/
-                int c = va_arg(args, int);
-                putchar(c);
-                count++;
-            }
+	count = 0;
 
-            else if (*format == 's')
-            {
-                /*print a string*/
-                char *s = va_arg(args, char *);
-                while (*s != '\0')
-                {
-                    putchar(*s);
-                    s++;
-                    count++;
-                }
-            }
+	while (*format != '\0') /*as long as the characters are not null byte*/
+	{
+		if (*format == '%') /*note when the program encounters a "%"*/
+		{
+			format++; /*Move past '%'*/
 
-            else if (*format == '%')
-            {
-                /*Print '%'*/
-                putchar('%');
-                count++;
-            }
-        }
+			if (*format == 'c')
+			{
+				/*print a character*/
+				int c = va_arg(args, int);
 
-        else
-        {
-            /*Print any other character*/
-            putchar(*format);
-            count++;
-        }
-        format++;
-    }
+				putchar(c);
+				count++;
+			}
 
-    va_end(args);
+			else if (*format == 's')
+			{
+				/*print a string*/
+				char *s = va_arg(args, char *);
 
-    return (count);
+				while (*s != '\0')
+				{
+					putchar(*s);
+					s++;
+					count++;
+				}
+			}
+
+			else if (*format == '%')
+			{
+				/*Print '%'*/
+				putchar('%');
+				count++;
+			}
+		}
+
+		else
+		{
+			/*Print any other character*/
+			putchar(*format);
+			count++;
+		}
+		format++;
+	}
+
+	va_end(args);
+
+	return (count);
 }
 
+int main(void)
+{
+	_printf("Hello, My name is %s\n", "Nimah");
+	return (0);
+}
