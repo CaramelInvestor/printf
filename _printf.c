@@ -2,7 +2,7 @@
 #include <stdarg.h>
 
 /**
- * _printf - Entry point
+ * _printf - Entry point of the program
  *
  * @format: A string containing all the desired characters
  *
