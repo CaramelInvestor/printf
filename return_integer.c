@@ -1,12 +1,12 @@
 #include "main.h"
 /**
- * output_integer - function that handles d
+ * return_integer - function that handles d
  * Description: makes convertion of integer
  * @arg: arguments
  * @s: char pointer
  * Return: returns count of digits
  */
-int output_integer(const char *s, va_list arg)
+int return_integer(const char *s, va_list arg)
 {
 	int a[18], h;
 	long int k = 1, n, m = 100000000000000000;

@@ -35,7 +35,7 @@ int my_putchar(char c);
 int output_alpha(const char *, va_list arg);
 int output_char(const char *, va_list arg);
 int output_decimal(const char *, va_list arg);
-int output_integer(const char *, va_list arg);
+int return_integer(const char *, va_list arg);
 int _printf(const char *format, ...);
 int percent_handler(const char **s, va_list args, int no_perc);
 int is_flag(const char s);
