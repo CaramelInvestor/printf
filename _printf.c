@@ -1,79 +1,164 @@
-#include <stdio.h>
-#include <stdarg.h>
-
+#include "main.h"
 /**
- * _printf - Entry point of the program
+ * is_flag - function that checks for flags
  *
- * @format: A string containing all the desired characters
+ * @s: string to be check
  *
- * Description: Receives the main string and all the necessary parameters to
- * print a formated string
- *
- * Return: A total count of the characters printed
+ * Return: return true or false
  */
 
-int _printf(const char *format, ...)
+int is_flag(const char s)
 {
-	va_list args;
+	char flags[] = {'-', '#', '0', 'l', 'h', '.', '+', ' ', '\0'};
+	int i;
 
-	va_start(args, format);
-
-	int count; /*counts the number of characters printed*/
-
-	count = 0;
-
-	while (*format != '\0') /*as long as the characters are not null byte*/
-	{
-		if (*format == '%') /*note when the program encounters a "%"*/
-		{
-			format++; /*Move past '%'*/
-
-			if (*format == 'c')
-			{
-				/*print a character*/
-				int c = va_arg(args, int);
-
-				putchar(c);
-				count++;
-			}
-
-			else if (*format == 's')
-			{
-				/*print a string*/
-				char *s = va_arg(args, char *);
-
-				while (*s != '\0')
-				{
-					putchar(*s);
-					s++;
-					count++;
-				}
-			}
-
-			else if (*format == '%')
-			{
-				/*Print '%'*/
-				putchar('%');
-				count++;
-			}
-		}
-
-		else
-		{
-			/*Print any other character*/
-			putchar(*format);
-			count++;
-		}
-		format++;
-	}
-
-	va_end(args);
-
-	return (count);
+	if (s >= '0' && s <= '9')
+		return (1);
+	for (i = 0; flags[i] != '\0'; i++)
+		if (s == flags[i])
+			return (1);
+	return (0);
 }
 
-int main(void)
+
+/**
+ * dot_null - function that checks for dot nulifiers
+ *
+ * @s: string pointer
+ *
+ * Return: return 1 if true, else return 0
+ */
+
+int dot_null(const char *s)
 {
-	_printf("Hello, My name is %s\n", "Nimah");
+	int i, d = 0;
+
+	for (i = 0; is_flag(s[i]); i++)
+	{
+		if (s[i] == '.')
+			d++;
+		if (d > 1)
+		if (s[i] >= '0' && s[i] <= '9')
+		return (1);
+	}
 	return (0);
+}
+
+/**
+ * cfmt - function that checks for specifiers
+ * @s: format
+ *
+ * Return: return function for format specifier
+ */
+int (*cfmt(const char **s))(const char *, va_list)
+{
+	int i, len = 13;
+	PrtFmt prt_fmt[] = {
+				{"s", output_alpha},
+				{"c", output_char},
+				{"d", output_decimal},
+				{"i", output_integer},
+				{"R", output_ROT13},
+				{"p", output_ptraddress},
+				{"r", output_revers},
+				{"b", output_bits},
+				{"S", output_bigS},
+				{"x", output_hexlower},
+				{"X", output_hexupper},
+				{"u", output_unsignedint},
+				{"o", output_octal}
+			};
+
+	while (is_flag(**s))
+		(*s)++;
+	for (i = 0; i < len; i++)
+		if (**s == *((prt_fmt + i)->spec))
+		return ((prt_fmt + i)->selectprint);
+	return (NULL);
+}
+
+/**
+ * percent_handler - function that handles percentage.
+ *
+ * @s: pointer to sting pointer
+ * @no_perc: number of percentage available
+ * @args: argument
+ *
+ * Return: return the length of printed string
+ */
+
+int percent_handler(const char **s, va_list args, int no_perc)
+{
+	int i, p_length = 0;
+	const char *check1, *check2;
+	int (*output)(const char *, va_list arg);
+
+	check1 = check2 = *s;
+	for (; *check1 == '%'; check1++)
+		no_perc++;
+	check2 = check1;
+	(dot_null(check1)) ? (output = NULL) : (output = cfmt(&check2));
+	if (output)
+	{
+		for (i = 0; i < (no_perc / 2); i++)
+		{
+			my_putchar('%');
+			p_length++;
+		}
+		if ((no_perc % 2) == 1)
+		{
+			p_length += output(check1, args);
+			*s = check2;
+		}
+		else
+		*s = check1 - 1;
+	}
+	else
+	{
+		if (*check2 == '%' && (no_perc % 2) == 1)
+			p_length += percent_handler(&check2, args, no_perc);
+		else
+		{
+		for (i = 0; i < (no_perc / 2)  + (no_perc % 2); i++)
+		{
+			my_putchar('%');
+			p_length++;
+		}
+			*s = check1 - 1;
+		}
+	}
+	return (p_length);
+}
+
+/**
+ * _printf - Printf function
+ * @format: format.
+ * Return: return formatted
+ */
+int _printf(const char *format, ...)
+{
+	const char *check;
+	int p_length = 0;
+	va_list args;
+
+	check = format;
+	va_start(args, format);
+
+	if (!format || (format[0] == '%' && !format[1]))
+		return (-1);
+	if (format[0] == '%' && format[1] == ' ' && !format[2])
+		return (-1);
+
+	while (*check != '\0')
+	{
+		if (*check == '%')
+			p_length += percent_handler(&check, args, 0);
+		else
+		{
+		p_length += my_putchar(*check);
+		}
+		check++;
+	}
+	va_end(args);
+	return (p_length);
 }
