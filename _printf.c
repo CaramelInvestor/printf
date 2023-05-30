@@ -1,164 +1,82 @@
+#include <stdio.h>
+#include <stdarg.h>
+#include <unistd.h>
 #include "main.h"
+
 /**
- * is_flag - function that checks for flags
- *
- * @s: string to be check
- *
- * Return: return true or false
+ * find_correct_func - function that prints the format for _printf
+ * @format: format to be printed
+ * Return: return NULL
  */
 
-int is_flag(const char s)
+int (*find_correct_func(const char *format))(va_list)
 {
-	char flags[] = {'-', '#', '0', 'l', 'h', '.', '+', ' ', '\0'};
-	int i;
+unsigned int i = 0;
+code_f find_f[] = {
+{"c", print_char},
+{"s", print_string},
+{"i", print_int},
+{"d", print_dec},
+{"r", print_rev},
+{"b", print_binary},
+{"u", print_unsigned},
+{"o", print_octal},
+{"x", print_hex},
+{"X", print_HEX},
+{"R", print_ROT13},
+{"S", print_S},
+{"p", print_p},
+{NULL, NULL}
+};
 
-	if (s >= '0' && s <= '9')
-		return (1);
-	for (i = 0; flags[i] != '\0'; i++)
-		if (s == flags[i])
-			return (1);
-	return (0);
+while (find_f[i].sc)
+{
+if (find_f[i].sc[0] == (*format))
+return (find_f[i].f);
+i++;
 }
-
-
-/**
- * dot_null - function that checks for dot nulifiers
- *
- * @s: string pointer
- *
- * Return: return 1 if true, else return 0
- */
-
-int dot_null(const char *s)
-{
-	int i, d = 0;
-
-	for (i = 0; is_flag(s[i]); i++)
-	{
-		if (s[i] == '.')
-			d++;
-		if (d > 1)
-		if (s[i] >= '0' && s[i] <= '9')
-		return (1);
-	}
-	return (0);
+return (NULL);
 }
 
 /**
- * cfmt - function that checks for specifiers
- * @s: format
- *
- * Return: return function for format specifier
- */
-int (*cfmt(const char **s))(const char *, va_list)
-{
-	int i, len = 13;
-	PrtFmt prt_fmt[] = {
-				{"s", output_alpha},
-				{"c", output_char},
-				{"d", output_decimal},
-				{"i", output_integer},
-				{"R", output_ROT13},
-				{"p", output_ptraddress},
-				{"r", output_revers},
-				{"b", output_bits},
-				{"S", output_bigS},
-				{"x", output_hexlower},
-				{"X", output_hexupper},
-				{"u", output_unsignedint},
-				{"o", output_octal}
-			};
-
-	while (is_flag(**s))
-		(*s)++;
-	for (i = 0; i < len; i++)
-		if (**s == *((prt_fmt + i)->spec))
-		return ((prt_fmt + i)->selectprint);
-	return (NULL);
-}
-
-/**
- * percent_handler - function that handles percentage.
- *
- * @s: pointer to sting pointer
- * @no_perc: number of percentage available
- * @args: argument
- *
- * Return: return the length of printed string
- */
-
-int percent_handler(const char **s, va_list args, int no_perc)
-{
-	int i, p_length = 0;
-	const char *check1, *check2;
-	int (*output)(const char *, va_list arg);
-
-	check1 = check2 = *s;
-	for (; *check1 == '%'; check1++)
-		no_perc++;
-	check2 = check1;
-	(dot_null(check1)) ? (output = NULL) : (output = cfmt(&check2));
-	if (output)
-	{
-		for (i = 0; i < (no_perc / 2); i++)
-		{
-			my_putchar('%');
-			p_length++;
-		}
-		if ((no_perc % 2) == 1)
-		{
-			p_length += output(check1, args);
-			*s = check2;
-		}
-		else
-		*s = check1 - 1;
-	}
-	else
-	{
-		if (*check2 == '%' && (no_perc % 2) == 1)
-			p_length += percent_handler(&check2, args, no_perc);
-		else
-		{
-		for (i = 0; i < (no_perc / 2)  + (no_perc % 2); i++)
-		{
-			my_putchar('%');
-			p_length++;
-		}
-			*s = check1 - 1;
-		}
-	}
-	return (p_length);
-}
-
-/**
- * _printf - Printf function
- * @format: format.
- * Return: return formatted
+ * _printf - function that prints an output in a particular format
+ * @format: the format to be printed
+ * Return: return size
  */
 int _printf(const char *format, ...)
 {
-	const char *check;
-	int p_length = 0;
-	va_list args;
-
-	check = format;
-	va_start(args, format);
-
-	if (!format || (format[0] == '%' && !format[1]))
-		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-
-	while (*check != '\0')
-	{
-		if (*check == '%')
-			p_length += percent_handler(&check, args, 0);
-		else
-		{
-		p_length += my_putchar(*check);
-		}
-		check++;
-	}
-	va_end(args);
-	return (p_length);
+va_list list;
+int (*f)(va_list);
+unsigned int i = 0, len = 0;
+if (format == NULL)
+return (-1);
+va_start(list, format);
+while (format[i])
+{
+while (format[i] != '%' && format[i])
+{
+_putchar(format[i]);
+len++;
+i++;
+}
+if (format[i] == '\0')
+return (len);
+f = find_correct_func(&format[i + 1]);
+if (f != NULL)
+{
+len += f(list);
+i += 2;
+continue;
+}
+if (!format[i + 1])
+return (-1);
+_putchar(format[i]);
+len++;
+if (format[i + 1] == '%')
+i += 2;
+else
+i++;
+}
+va_end(list);
+return (len);
 }
